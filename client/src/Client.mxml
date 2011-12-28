@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+               xmlns:mx="library://ns.adobe.com/flex/mx"
+               creationComplete="onCreationComplete(event)">
+
+  <s:layout>
+    <s:VerticalLayout verticalAlign="middle" horizontalAlign="center"/>
+  </s:layout>
+
+  <fx:Declarations>
+    <fx:Number id="cameraWidth">800</fx:Number>
+    <fx:Number id="cameraHeight">600</fx:Number>
+    <fx:Number id="cameraFramesPerSecond">12</fx:Number>
+    <fx:Boolean id="cameraFavorArea">true</fx:Boolean>
+  </fx:Declarations>
+
+  <fx:Script><![CDATA[
+    import mx.controls.Alert;
+    import mx.events.FlexEvent;
+    import mx.graphics.ImageSnapshot;
+
+    private var camera:Camera;
+
+    private function onCreationComplete(event:FlexEvent):void {
+      if (!Camera.isSupported) {
+        Alert.show("You need working web camera installed", "Sorry");
+        return;
+      }
+      camera = Camera.getCamera();
+      camera.setMode(cameraWidth, cameraHeight, cameraFramesPerSecond, cameraFavorArea);
+      videoDisplay.attachCamera(camera);
+    }
+
+    private function captureFrame():void {
+      var bitmap:Bitmap = new Bitmap(ImageSnapshot.captureBitmapData(videoDisplay));
+      imagePreview.source = bitmap;
+      var byteArray:ByteArray = bitmap.bitmapData.getPixels(bitmap.getRect(videoDisplay));
+      bytes.text = "ByteArray\n---\n\n" + String(byteArray);
+    }
+    ]]></fx:Script>
+
+  <s:HGroup>
+    <mx:VideoDisplay id="videoDisplay"
+                     width="{cameraWidth/2}" height="{cameraHeight/2}">
+    </mx:VideoDisplay>
+    <mx:SWFLoader id="imagePreview"
+                  width="{cameraWidth/2}" height="{cameraHeight/2}">
+    </mx:SWFLoader>
+    <mx:TextArea id="bytes"
+                 width="{cameraWidth/2}" height="{cameraHeight/2}">
+    </mx:TextArea>
+  </s:HGroup>
+
+  <mx:ApplicationControlBar>
+    <mx:Button label="Capture Frame" click="captureFrame()"></mx:Button>
+  </mx:ApplicationControlBar>
+
+</s:Application>
